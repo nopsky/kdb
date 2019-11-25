@@ -7,6 +7,7 @@ package main
 
 import (
 	"kdb"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -16,8 +17,20 @@ func main() {
 	dbConfig := new(kdb.DBConfig)
 	dbConfig.Driver = "mysql"
 	dbConfig.Dsn = "root:123456@tcp(127.0.0.1:3306)/kdb?charset=utf8&parseTime=true"
+	dbConfig.IsMaster = true
 	kConf.DBConfigList = []kdb.DBConfig{*dbConfig}
 	kdb.RegisterDataBase(*kConf)
 
-	kdb.Select("select * from test where id = ?", 1)
+
+	type user struct{
+		Id int `db:"id"`
+		Name string `db:"name"`
+	}
+	var result []user
+	err := kdb.Select("select * from user").ToStruct(&result)
+	if err != nil {
+		log.Println("err:", err.Error())
+	}
+
+	log.Println("result:", result)
 }
