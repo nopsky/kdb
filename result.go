@@ -11,6 +11,85 @@ import (
 	"reflect"
 )
 
+
+type Row struct {
+	rs *Rows
+	lastError error
+}
+
+func (r *Row) ToArray() (result []string, err error) {
+	items, err := r.rs.ToArray()
+	if err != nil {
+		r.lastError = err
+		return nil, err
+	}
+	return items[0], nil
+}
+
+func (r *Row) ToMap() (result map[string]string, err error) {
+	items, err := r.rs.ToMap()
+	if err != nil {
+		r.lastError = err
+		return nil, err
+	}
+	return items[0], nil
+}
+
+func (r *Row) ToStruct(st interface{}) error{
+	//获取变量的类型
+	stType := reflect.TypeOf(st)
+
+	stVal := reflect.ValueOf(st)
+
+	if stType.Kind() != reflect.Ptr {
+		return fmt.Errorf("the variable type is %v, not a pointer", stType.Kind())
+	}
+
+	stTypeInd := stType.Elem()
+
+	if r.rs.rs == nil {
+		return r.lastError
+	}
+
+	defer r.rs.rs.Close()
+
+	v := reflect.New(stTypeInd)
+
+	tagList, err := extractTagInfo(v)
+	if err != nil {
+		return err
+	}
+
+	fields, err := r.rs.rs.Columns()
+
+	if err != nil {
+		r.rs.lastError = err
+		return err
+	}
+
+	refs := make([]interface{}, len(fields))
+
+	for i, field := range fields {
+		if f, ok := tagList[field]; ok {
+			refs[i] = f.Addr().Interface()
+		} else {
+			refs[i] = new(interface{})
+		}
+	}
+
+	if !r.rs.rs.Next() {
+		return sql.ErrNoRows
+	}
+
+	if err := r.rs.rs.Scan(refs...); err != nil {
+		return err
+	}
+
+	stVal.Elem().Set(v.Elem())
+
+	return nil
+}
+
 type Rows struct {
 	rs        *sql.Rows
 	lastError error

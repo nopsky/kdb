@@ -18,5 +18,7 @@ type DBConfig struct {
 }
 
 type KConfig struct {
+	TablePrefix  string
+	StructTag    string
 	DBConfigList []DBConfig
 }

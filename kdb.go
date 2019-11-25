@@ -10,6 +10,13 @@ import (
 	"database/sql"
 )
 
+var kdb *engine
+
+type engine struct {
+	tablePrefix string
+	structTag   string
+}
+
 func RegisterDataBase(kConf KConfig) {
 	for _, dbConf := range kConf.DBConfigList {
 		db, err := sql.Open(dbConf.Driver, dbConf.Dsn)
@@ -32,6 +39,13 @@ func RegisterDataBase(kConf KConfig) {
 			dbConf.Name = defaultGroupName
 		}
 		m.addDB(dbConf.Name, dbConf.IsMaster, db)
+	}
+
+	kdb = new(engine)
+	kdb.tablePrefix = kConf.TablePrefix
+	kdb.structTag = "db"
+	if kConf.StructTag != "" {
+		kdb.structTag = kConf.StructTag
 	}
 }
 
@@ -74,4 +88,8 @@ func BeginTransaction() (conn *Connection, err error) {
 	}
 
 	return conn, nil
+}
+
+func Table(table string) *Builder {
+	return newConnection().Table(table)
 }

@@ -231,3 +231,13 @@ func (c *Connection) getConn() (*sql.Conn, error) {
 
 	return c.conn, nil
 }
+
+func (c *Connection) Table(table string) *Builder {
+	return c.query().Table(table)
+}
+
+func (c *Connection) query() *Builder {
+	g := NewGrammar()
+	b := newBuilder(c, g)
+	return b
+}

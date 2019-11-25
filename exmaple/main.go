@@ -21,13 +21,12 @@ func main() {
 	kConf.DBConfigList = []kdb.DBConfig{*dbConfig}
 	kdb.RegisterDataBase(*kConf)
 
-
-	type user struct{
-		Id int `db:"id"`
+	type user struct {
+		Id   int    `db:"id"`
 		Name string `db:"name"`
 	}
 	var result []user
-	err := kdb.Select("select * from user").ToStruct(&result)
+	err := kdb.Table("user").Where("id", 1).Get().ToStruct(&result)
 	if err != nil {
 		log.Println("err:", err.Error())
 	}
