@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-    "kdb"
+	"kdb"
 
 	_ "github.com/go-sql-driver/mysql"
 )
