@@ -26,8 +26,8 @@ func main() {
     
     //原生SQL查询
     kdb.Select("select * from user where id = ?", 1).ToArray()
-    //返回map[string][string]
-	kdb.Select("select * from user where id = ?", 1).ToMap()
+    //返回map[string][string] 
+    kdb.Select("select * from user where id = ?", 1).ToMap()
     //返回struct
     type user struct {
         Id int `db:"id"`
