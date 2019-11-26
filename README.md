@@ -30,14 +30,28 @@ func main() {
     kdb.Select("select * from user where id = ?", 1).ToMap()
     //返回struct
     type user struct {
-        Id int `db:"id"`
+        Id int `db:"id;auto"`
         Name string `db:"string"`
     }
     var result []user
     kdb.Select("select * from user").ToStruct(&result)
     fmt.Println("result:", result)
     
-    //链式操作,返回单挑数据
+    //链式操作,返回单条数据
     kdb.Table("user").Where("id", 1).First().ToArray()
+    
+    //支持指定库操作
+    var u user
+    kdb.WithDB("mysql::master").Table("user").Where("id", 1).First().ToStruct(&u)
+    
+    //批量插入支持map方式和struct方式
+    a1 := new(user)
+    a1.Name = "张三"
+    
+    a2 := new(user)
+    a2.Name = "李四"
+    
+    users := []user{*a1, *a2}
+    kdb.Table("user").MultiInsert(users)
 }
 ```
