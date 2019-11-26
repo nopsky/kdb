@@ -22,12 +22,12 @@ type Builder struct {
 	bindings   map[string][]interface{}
 	columns    []string
 	agg        *aggregate
-	joins      []*join
-	wheres     []*where
+	joins      []join
+	wheres     []where
 	groups     []string
-	havings    []*where
-	orders     []*order
-	unions     []*union
+	havings    []where
+	orders     []order
+	unions     []union
 	offsetFlag bool
 	offset     int
 	limitFlag  bool
@@ -71,9 +71,7 @@ func newBuilder(conn *Connection, grammar *Grammar) *Builder {
 	b := new(Builder)
 	b.conn = conn
 	b.grammar = grammar
-	b.columns = make([]string, 0)
 	b.bindings = make(map[string][]interface{})
-	b.wheres = make([]*where, 0)
 	return b
 }
 
@@ -105,11 +103,8 @@ func (b *Builder) join(table string, column string, operator string, value strin
 	j.value = value
 	j.typ = typ
 	j.glue = glue
-	if b.joins == nil {
-		b.joins = []*join{j}
-	} else {
-		b.joins = append(b.joins, j)
-	}
+	b.joins = append(b.joins, *j)
+
 	return b
 }
 
@@ -156,7 +151,7 @@ func (b *Builder) Where(column interface{}, args ...interface{}) *Builder {
 
 	b.addBinding("where", []interface{}{w.value})
 
-	b.wheres = append(b.wheres, w)
+	b.wheres = append(b.wheres, *w)
 
 	return b
 }
@@ -168,7 +163,7 @@ func (b *Builder) WhereIsNull(column interface{}) *Builder {
 	w.typ = "null"
 	w.operator = "is"
 	w.value = "null"
-	b.wheres = append(b.wheres, w)
+	b.wheres = append(b.wheres, *w)
 	return b
 }
 
@@ -202,7 +197,7 @@ func (b *Builder) OrWhere(column interface{}, args ...interface{}) *Builder {
 
 	b.addBinding("where", []interface{}{w.value})
 
-	b.wheres = append(b.wheres, w)
+	b.wheres = append(b.wheres, *w)
 
 	return b
 }
@@ -214,7 +209,7 @@ func (b *Builder) orWhereIsNull(column interface{}) *Builder {
 	w.typ = "null"
 	w.operator = "is"
 	w.value = "null"
-	b.wheres = append(b.wheres, w)
+	b.wheres = append(b.wheres, *w)
 	return b
 }
 
@@ -224,7 +219,7 @@ func (b *Builder) WhereIn(column interface{}, values interface{}) *Builder {
 	w.glue = "and"
 	w.typ = "in"
 	w.operator = "in"
-	b.wheres = append(b.wheres, w)
+	b.wheres = append(b.wheres, *w)
 
 	v := reflect.ValueOf(values)
 	if v.Kind() == reflect.Slice {
@@ -243,7 +238,7 @@ func (b *Builder) WhereNotIn(column interface{}, values interface{}) *Builder {
 	w.glue = "and"
 	w.typ = "in"
 	w.operator = "not in"
-	b.wheres = append(b.wheres, w)
+	b.wheres = append(b.wheres, *w)
 
 	v := reflect.ValueOf(values)
 	if v.Kind() == reflect.Slice {
@@ -292,11 +287,7 @@ func (b *Builder) Having(column interface{}, args ...interface{}) *Builder {
 
 	b.addBinding("having", []interface{}{w.value})
 
-	if b.havings == nil {
-		b.havings = []*where{w}
-	} else {
-		b.havings = append(b.havings, w)
-	}
+	b.havings = append(b.havings, *w)
 
 	return b
 }
@@ -312,10 +303,7 @@ func (b *Builder) OrderBy(column string, direction ...string) *Builder {
 	o := new(order)
 	o.column = column
 	o.direction = direct
-
-	if b.orders == nil {
-		b.orders = []*order{o}
-	}
+	b.orders = append(b.orders, *o)
 
 	return b
 }
@@ -343,11 +331,7 @@ func (b *Builder) Union(query *Builder, all ...bool) *Builder {
 	u := new(union)
 	u.query = query
 	u.all = allFlag
-	if b.unions == nil {
-		b.unions = []*union{u}
-	} else {
-		b.unions = append(b.unions, u)
-	}
+	b.unions = append(b.unions, *u)
 
 	b.addBinding("union", query.getBindings())
 

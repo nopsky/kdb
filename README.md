@@ -15,14 +15,14 @@ import (
 
 func main() {
     //初始化配置
-	kConf := new(kdb.KConfig)
+    kConf := new(kdb.KConfig)
     //初始化DB的配置
-	dbConfig := new(kdb.DBConfig)
-	dbConfig.Driver = "mysql"
-	dbConfig.Dsn = "root:123456@tcp(127.0.0.1:3306)/kdb?charset=utf8&parseTime=true"
-	dbConfig.IsMaster = true
-	kConf.DBConfigList = []kdb.DBConfig{*dbConfig}
-	kdb.RegisterDataBase(*kConf)
+    dbConfig := new(kdb.DBConfig)
+    dbConfig.Driver = "mysql"
+    dbConfig.Dsn = "root:123456@tcp(127.0.0.1:3306)/kdb?charset=utf8&parseTime=true"
+    dbConfig.IsMaster = true
+    kConf.DBConfigList = []kdb.DBConfig{*dbConfig}
+    kdb.RegisterDataBase(*kConf)
     
     //原生SQL查询
     kdb.Select("select * from user where id = ?", 1).ToArray()

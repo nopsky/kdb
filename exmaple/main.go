@@ -6,6 +6,7 @@
 package main
 
 import (
+	"fmt"
 	"kdb"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -19,4 +20,8 @@ func main() {
 	dbConfig.IsMaster = true
 	kConf.DBConfigList = []kdb.DBConfig{*dbConfig}
 	kdb.RegisterDataBase(*kConf)
+
+	data, _ := kdb.Table("user").Where("name", "nopsky").Get().ToArray()
+
+	fmt.Println("data:", data)
 }
